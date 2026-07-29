@@ -1,0 +1,622 @@
+// ============================================================================
+// EduPulse ERP — Prisma Schema
+// Matches the data contracts required by the React/Vite frontend 1:1.
+// See /docs or API_INTEGRATION_GUIDE.md for how each model maps to a
+// frontend TypeScript interface (UserProfile, ChildInfo, BusTrackingInfo...).
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// ENUMS
+// ---------------------------------------------------------------------------
+
+enum Role {
+  STUDENT
+  PARENT
+  TEACHER
+  ADMIN
+}
+
+enum Trend {
+  UP
+  DOWN
+  STABLE
+}
+
+enum AssignmentStatus {
+  PENDING
+  SUBMITTED
+  GRADED
+}
+
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum BadgeCategory {
+  ACADEMIC
+  WELLNESS
+  ATTENDANCE
+  SAFETY
+}
+
+enum RiskType {
+  ACADEMIC
+  ATTENDANCE
+  WELLNESS
+  COMBINED
+}
+
+enum Severity {
+  HIGH
+  MEDIUM
+  CRITICAL
+  WARNING
+  INFO
+}
+
+enum BusStatus {
+  ON_TIME
+  DELAYED
+  STOPPED
+}
+
+enum ChildBusStatus {
+  ON_ROUTE
+  ARRIVED
+  DELAYED
+  NOT_STARTED
+}
+
+enum FeeStatus {
+  PAID
+  PENDING
+  OVERDUE
+}
+
+enum GatePassStatus {
+  APPROVED
+  PENDING
+  USED
+  EXPIRED
+}
+
+enum EmergencyType {
+  LOCKDOWN
+  WEATHER
+  MEDICAL
+  FIRE
+  GENERAL
+}
+
+enum EmergencyStatus {
+  ACTIVE
+  RESOLVED
+}
+
+enum AnnouncementCategory {
+  URGENT
+  ACADEMIC
+  TRANSPORT
+  WELLNESS
+  EVENT
+}
+
+enum NotificationType {
+  ALERT
+  ACADEMIC
+  TRANSPORT
+  WELLNESS
+  MESSAGE
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+  TEACHER
+  PARENT
+  STUDENT
+  ADMIN
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+// ---------------------------------------------------------------------------
+// CORE IDENTITY
+// ---------------------------------------------------------------------------
+
+model School {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  classes      SchoolClass[]
+  buses        Bus[]
+  announcements CircularAnnouncement[]
+
+  @@map("schools")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  avatarUrl    String   @default("")
+  phone        String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  studentProfile StudentProfile?
+  parentProfile  ParentProfile?
+  teacherProfile TeacherProfile?
+
+  notifications      Notification[]
+  refreshTokens      RefreshToken[]
+  sentMessages       Message[]              @relation("MessageSender")
+  conversations      ConversationParticipant[]
+  aiChatMessages     AiChatMessage[]
+  gatePassesRequested DigitalGatePass[]     @relation("GatePassRequestedBy")
+  emergencyAlertsIssued EmergencyAlert[]    @relation("EmergencyIssuedBy")
+  announcementsAuthored CircularAnnouncement[] @relation("AnnouncementAuthor")
+  feePayments        FeePayment[]
+
+  @@map("users")
+  @@index([role])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// ACADEMIC STRUCTURE
+// ---------------------------------------------------------------------------
+
+model SchoolClass {
+  id        String   @id @default(uuid())
+  grade     String // e.g. "Grade 10"
+  section   String // e.g. "A"
+  schoolId  String?
+  school    School?  @relation(fields: [schoolId], references: [id])
+  classTeacherId String?
+  classTeacher   TeacherProfile? @relation("ClassTeacher", fields: [classTeacherId], references: [id])
+  createdAt DateTime @default(now())
+
+  students  StudentProfile[]
+  subjects  ClassSubject[]
+  assignments Assignment[]
+
+  @@unique([grade, section, schoolId])
+  @@map("school_classes")
+}
+
+model Subject {
+  id   String @id @default(uuid())
+  name String @unique
+
+  classSubjects   ClassSubject[]
+  subjectGrades   SubjectGrade[]
+  assignments     Assignment[]
+
+  @@map("subjects")
+}
+
+model ClassSubject {
+  id        String  @id @default(uuid())
+  classId   String
+  class     SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacherId String?
+  teacher   TeacherProfile? @relation(fields: [teacherId], references: [id])
+
+  @@unique([classId, subjectId])
+  @@map("class_subjects")
+}
+
+// ---------------------------------------------------------------------------
+// ROLE PROFILES
+// ---------------------------------------------------------------------------
+
+model StudentProfile {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rollNumber         String?
+  classId            String?
+  class              SchoolClass? @relation(fields: [classId], references: [id])
+  gpa                Float    @default(0)
+  attendancePercent  Float    @default(100)
+  busId              String?
+  bus                Bus?     @relation(fields: [busId], references: [id])
+  busStatus          ChildBusStatus @default(NOT_STARTED)
+  feeStatus          FeeStatus @default(PENDING)
+  pendingFeeAmount   Float    @default(0)
+  xpPoints           Int      @default(0)
+  streakDays         Int      @default(0)
+
+  parentLinks        ParentStudent[]
+  subjectGrades       SubjectGrade[]
+  assignmentSubmissions AssignmentSubmission[]
+  badges              AchievementBadge[]
+  moodEntries         MoodEntry[]
+  riskAlerts          StrugglingStudentAlert[]
+  attendanceRecords   AttendanceRecord[]
+  gatePasses          DigitalGatePass[]
+  feeInvoices         FeeInvoice[]
+
+  @@map("student_profiles")
+}
+
+model ParentProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  children ParentStudent[]
+
+  @@map("parent_profiles")
+}
+
+model ParentStudent {
+  id        String @id @default(uuid())
+  parentId  String
+  parent    ParentProfile   @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  studentId String
+  student   StudentProfile  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  relation  String @default("Parent")
+
+  @@unique([parentId, studentId])
+  @@map("parent_students")
+}
+
+model TeacherProfile {
+  id               String  @id @default(uuid())
+  userId           String  @unique
+  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title            String  @default("Teacher")
+  subjectSpecialty String  @default("")
+
+  classesTaught    SchoolClass[]  @relation("ClassTeacher")
+  classSubjects    ClassSubject[]
+  subjectGrades    SubjectGrade[]
+  assignments      Assignment[]
+
+  @@map("teacher_profiles")
+}
+
+// ---------------------------------------------------------------------------
+// PERFORMANCE / ACADEMICS
+// ---------------------------------------------------------------------------
+
+model SubjectGrade {
+  id            String   @id @default(uuid())
+  studentId     String
+  student       StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subjectId     String
+  subject       Subject  @relation(fields: [subjectId], references: [id])
+  teacherId     String?
+  teacher       TeacherProfile? @relation(fields: [teacherId], references: [id])
+  score         Float
+  grade         String
+  trend         Trend    @default(STABLE)
+  lastTestScore Float
+  updatedAt     DateTime @updatedAt
+
+  @@unique([studentId, subjectId])
+  @@map("subject_grades")
+}
+
+model Assignment {
+  id        String   @id @default(uuid())
+  title     String
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+  classId   String
+  class     SchoolClass @relation(fields: [classId], references: [id])
+  teacherId String
+  teacher   TeacherProfile @relation(fields: [teacherId], references: [id])
+  dueDate   DateTime
+  maxScore  Float    @default(100)
+  priority  Priority @default(MEDIUM)
+  description String @default("")
+  createdAt DateTime @default(now())
+
+  submissions AssignmentSubmission[]
+
+  @@map("assignments")
+}
+
+model AssignmentSubmission {
+  id           String  @id @default(uuid())
+  assignmentId String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  studentId    String
+  student      StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status       AssignmentStatus @default(PENDING)
+  score        Float?
+  fileUrl      String?
+  submittedAt  DateTime?
+  gradedAt     DateTime?
+
+  @@unique([assignmentId, studentId])
+  @@map("assignment_submissions")
+}
+
+model AchievementBadge {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  iconName    String
+  category    BadgeCategory
+  dateEarned  DateTime @default(now())
+
+  @@map("achievement_badges")
+}
+
+model AttendanceRecord {
+  id        String   @id @default(uuid())
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classId   String
+  date      DateTime @default(now())
+  status    AttendanceStatus @default(PRESENT)
+  markedByTeacherId String?
+
+  @@unique([studentId, date])
+  @@map("attendance_records")
+}
+
+// ---------------------------------------------------------------------------
+// WELLNESS
+// ---------------------------------------------------------------------------
+
+model MoodEntry {
+  id        String   @id @default(uuid())
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  date      String // YYYY-MM-DD, one entry per day (matches frontend behavior)
+  score     Int // 1-5
+  tags      String[]
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@unique([studentId, date])
+  @@map("mood_entries")
+}
+
+model StrugglingStudentAlert {
+  id              String   @id @default(uuid())
+  studentId       String
+  student         StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  riskType        RiskType
+  severity        Severity
+  reason          String
+  aiRecommendation String
+  dateFlagged     DateTime @default(now())
+  resolved        Boolean  @default(false)
+
+  @@map("risk_alerts")
+}
+
+// ---------------------------------------------------------------------------
+// TRANSPORT / SAFETY
+// ---------------------------------------------------------------------------
+
+model Bus {
+  id            String   @id @default(uuid())
+  busNumber     String   @unique
+  driverName    String
+  driverPhone   String
+  routeNumber   String
+  routeName     String
+  speedLimit    Float    @default(45)
+  maxCapacity   Int      @default(40)
+  schoolId      String?
+  school        School?  @relation(fields: [schoolId], references: [id])
+
+  // Live telemetry (updated via Socket.IO + persisted for reload/history)
+  currentSpeed    Float    @default(0)
+  status          BusStatus @default(ON_TIME)
+  etaMinutes      Int      @default(0)
+  passengerCount  Int      @default(0)
+  currentPosX     Float    @default(0)
+  currentPosY     Float    @default(0)
+  updatedAt       DateTime @updatedAt
+
+  stops    BusStop[]
+  students StudentProfile[]
+
+  @@map("buses")
+}
+
+model BusStop {
+  id       String  @id @default(uuid())
+  busId    String
+  bus      Bus     @relation(fields: [busId], references: [id], onDelete: Cascade)
+  name     String
+  time     String
+  order    Int
+  passed   Boolean @default(false)
+  coordX   Float
+  coordY   Float
+
+  @@map("bus_stops")
+}
+
+model DigitalGatePass {
+  id                String   @id @default(uuid())
+  studentId         String
+  student           StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  requestedByUserId String
+  requestedBy       User     @relation("GatePassRequestedBy", fields: [requestedByUserId], references: [id])
+  reason            String
+  date              String
+  timeOut           String
+  status            GatePassStatus @default(PENDING)
+  qrCodeUrl         String?
+  pickupPerson      String
+  createdAt         DateTime @default(now())
+
+  @@map("digital_gate_passes")
+}
+
+model EmergencyAlert {
+  id           String   @id @default(uuid())
+  type         EmergencyType
+  title        String
+  message      String
+  issuedByUserId String
+  issuedBy     User     @relation("EmergencyIssuedBy", fields: [issuedByUserId], references: [id])
+  status       EmergencyStatus @default(ACTIVE)
+  severity     Severity
+  createdAt    DateTime @default(now())
+
+  @@map("emergency_alerts")
+}
+
+// ---------------------------------------------------------------------------
+// COMMUNICATION
+// ---------------------------------------------------------------------------
+
+model CircularAnnouncement {
+  id               String   @id @default(uuid())
+  title            String
+  content          String
+  category         AnnouncementCategory
+  authorUserId     String
+  author           User     @relation("AnnouncementAuthor", fields: [authorUserId], references: [id])
+  targetRoles      Role[]
+  attachmentsCount Int      @default(0)
+  schoolId         String?
+  school           School?  @relation(fields: [schoolId], references: [id])
+  createdAt        DateTime @default(now())
+
+  @@map("circular_announcements")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      NotificationType
+  read      Boolean  @default(false)
+  actionUrl String?
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+  @@index([userId, read])
+}
+
+model Conversation {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  id             String   @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastReadAt     DateTime?
+
+  @@unique([conversationId, userId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User     @relation("MessageSender", fields: [senderId], references: [id])
+  text           String
+  attachmentUrl  String?
+  createdAt      DateTime @default(now())
+
+  @@map("messages")
+  @@index([conversationId, createdAt])
+}
+
+model AiChatMessage {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role             ChatRole
+  text             String
+  suggestedActions String[]
+  createdAt        DateTime @default(now())
+
+  @@map("ai_chat_messages")
+  @@index([userId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// FEES
+// ---------------------------------------------------------------------------
+
+model FeeInvoice {
+  id        String   @id @default(uuid())
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  term      String
+  description String @default("Tuition & Transport")
+  amount    Float
+  dueDate   DateTime
+  status    FeeStatus @default(PENDING)
+  createdAt DateTime @default(now())
+
+  payments  FeePayment[]
+
+  @@map("fee_invoices")
+}
+
+model FeePayment {
+  id            String   @id @default(uuid())
+  invoiceId     String
+  invoice       FeeInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount        Float
+  payerUserId   String
+  payer         User     @relation(fields: [payerUserId], references: [id])
+  method        String   @default("card")
+  transactionRef String  @unique @default(uuid())
+  paidAt        DateTime @default(now())
+
+  @@map("fee_payments")
+}

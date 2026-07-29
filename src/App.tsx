@@ -17,6 +17,7 @@ import { LandingPage } from './components/modules/landing/LandingPage';
 import { AuthModal } from './components/modules/landing/AuthModal';
 import { EmergencySOSModal } from './components/modules/safety/EmergencySOSModal';
 import { FloatingAIAssistant } from './components/ai/FloatingAIAssistant';
+import { GamifiedLearning } from './components/modules/learning/GamifiedLearning';
 
 const AppContent: React.FC = () => {
   const { role, activeTab, isLandingPage } = useApp();
@@ -42,7 +43,7 @@ const AppContent: React.FC = () => {
 
       case 'academics':
       case 'achievements':
-        return <StudentDashboard />;
+        return <GamifiedLearning />;
 
       case 'safety':
         return (

@@ -10,7 +10,10 @@ import {
   BookOpen,
   Send,
   Plus,
-  CheckCircle2
+  CheckCircle2,
+  TrendingUp,
+  BarChart3,
+  Calendar
 } from 'lucide-react';
 
 export const TeacherDashboard: React.FC = () => {
@@ -21,7 +24,7 @@ export const TeacherDashboard: React.FC = () => {
     std_103: 'present',
     std_104: 'present',
     std_105: 'present',
-    std_106: 'late'
+    std_106: 'absent'
   });
   const [savedAttendance, setSavedAttendance] = useState(false);
   const [showCreateAssignmentModal, setShowCreateAssignmentModal] = useState(false);
@@ -36,12 +39,12 @@ export const TeacherDashboard: React.FC = () => {
   };
 
   const studentsList = [
-    { id: 'std_101', name: 'Alex Vance', roll: '10A-01', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80' },
-    { id: 'std_102', name: 'Liam Hemsworth', roll: '10A-02', avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80' },
-    { id: 'std_103', name: 'Sophia Chen', roll: '10A-03', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80' },
-    { id: 'std_104', name: 'Marcus Brody', roll: '10A-04', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80' },
-    { id: 'std_105', name: 'Chloe Bennett', roll: '10A-05', avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&auto=format&fit=crop&q=80' },
-    { id: 'std_106', name: 'Daniel Park', roll: '10A-06', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80' }
+    { id: 'std_101', name: 'Aarav Sharma', roll: '5A-01', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80' },
+    { id: 'std_102', name: 'Diya Patel', roll: '5A-02', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80' },
+    { id: 'std_103', name: 'Vivaan Singh', roll: '5A-03', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80' },
+    { id: 'std_104', name: 'Ananya Gupta', roll: '5A-04', avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&auto=format&fit=crop&q=80' },
+    { id: 'std_105', name: 'Liam Hemsworth', roll: '5A-05', avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80' },
+    { id: 'std_106', name: 'Daniel Park', roll: '5A-06', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80' }
   ];
 
   return (
@@ -52,141 +55,124 @@ export const TeacherDashboard: React.FC = () => {
       className="space-y-6"
     >
       {/* Header Banner */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-purple-950/40 to-slate-900 border border-purple-500/20 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold flex items-center gap-1.5 w-fit mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" /> Educator Portal • Grade 10 Physics & STEM
+      <div className="p-6 md:p-8 rounded-3xl purple-gradient-hero text-white shadow-xl glow-purple flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="space-y-2">
+          <span className="px-3.5 py-1 rounded-full bg-white/20 text-white backdrop-blur-md text-xs font-black flex items-center gap-1.5 w-fit border border-white/20">
+            <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" /> Grade 5-A Educator • Mrs. Sharma
           </span>
-          <h1 className="text-2xl font-extrabold text-white">Welcome, {user.name}</h1>
-          <p className="text-slate-300 text-xs mt-1">
-            28 Enrolled Students • Class Average: 89.4% • 3 AI Early Warning Flags Raised
+          <h1 className="text-2xl sm:text-3xl font-black">Good Morning, Mrs. Sharma 👋</h1>
+          <p className="text-purple-100 text-xs sm:text-sm font-medium">
+            Class Overview: <strong className="text-white font-black">32 Enrolled Students</strong> • Average Score: <strong className="text-emerald-300 font-black">82% (+8%)</strong>
           </p>
         </div>
 
         <motion.button
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowCreateAssignmentModal(true)}
-          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-600/20 transition-all flex items-center gap-2"
+          className="px-4.5 py-3 rounded-2xl bg-white hover:bg-purple-50 text-[#7C3AED] font-extrabold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer"
         >
-          <Plus className="w-4 h-4" /> Create New Assignment
+          <Plus className="w-4 h-4 text-[#7C3AED]" /> Create Homework Task
         </motion.button>
       </div>
 
-      {/* High-Risk AI Early Warning System Section */}
-      <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 glass-panel space-y-4 shadow-xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-bold text-base text-white flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-rose-400 animate-bounce" />
-              <span>AI Early Warning System (Struggling & Stress Detection)</span>
-            </h3>
-            <p className="text-xs text-slate-400">Automated machine learning risk flags based on grades, attendance, and sentiment check-ins.</p>
+      {/* Class Analytics & Attendance Metrics Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="p-5 rounded-3xl clay-card">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-extrabold text-purple-700">Class Attendance</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-xs">
+              Today
+            </span>
           </div>
-          <span className="px-3 py-1 bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-full text-xs font-bold animate-pulse">
-            3 High Priority Action Items
-          </span>
+          <div className="flex items-baseline gap-3 mt-2">
+            <span className="text-3xl font-black text-[#1E1B4B]">32</span>
+            <span className="text-xs font-bold text-emerald-700">28 Present • 4 Absent</span>
+          </div>
+          <div className="w-full h-2 bg-purple-100 rounded-full mt-2 overflow-hidden flex">
+            <div className="h-full bg-emerald-500 rounded-l-full" style={{ width: '87.5%' }}></div>
+            <div className="h-full bg-rose-500 rounded-r-full" style={{ width: '12.5%' }}></div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {MOCK_RISK_ALERTS.map((alert) => (
-            <motion.div
-              key={alert.id}
-              whileHover={{ y: -4, scale: 1.02 }}
-              className="p-4 rounded-2xl bg-slate-950 border border-rose-500/30 space-y-3 relative hover:border-rose-500/60 transition-all shadow-md"
-            >
-              <div className="flex items-center gap-3">
-                <img src={alert.avatar} alt={alert.studentName} className="w-9 h-9 rounded-full object-cover ring-2 ring-rose-500/50" />
-                <div>
-                  <h4 className="font-bold text-xs text-white">{alert.studentName}</h4>
-                  <span className="text-[10px] text-slate-400">{alert.grade}</span>
-                </div>
-                <span className={`ml-auto text-[9px] font-extrabold px-2 py-0.5 rounded uppercase ${
-                  alert.riskType === 'academic' ? 'bg-amber-500/20 text-amber-400' :
-                  alert.riskType === 'wellness' ? 'bg-purple-500/20 text-purple-400' : 'bg-rose-500/20 text-rose-400'
-                }`}>
-                  {alert.riskType} Risk
-                </span>
-              </div>
+        <div className="p-5 rounded-3xl clay-card">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-extrabold text-purple-700">Class Analytics</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-extrabold text-xs">
+              This Month
+            </span>
+          </div>
+          <div className="flex items-baseline gap-2 mt-2">
+            <span className="text-3xl font-black text-[#7C3AED]">82%</span>
+            <span className="text-xs font-extrabold text-emerald-600">+8% Improvement</span>
+          </div>
+          <p className="text-xs text-purple-800 font-bold mt-1">Top Subject: Mathematics (93% avg)</p>
+        </div>
 
-              <p className="text-xs text-slate-300 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 leading-relaxed">
-                "{alert.reason}"
-              </p>
-
-              <div className="p-2.5 rounded-xl bg-brand-950/40 border border-brand-500/20 text-[11px] text-brand-300">
-                <strong className="text-brand-400 font-bold block mb-0.5">AI Recommendation:</strong>
-                {alert.aiRecommendation}
-              </div>
-
-              <div className="flex items-center justify-between pt-1">
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setActiveTab('communication')}
-                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-bold border border-slate-700 flex items-center gap-1"
-                >
-                  <Send className="w-3 h-3 text-brand-400" /> Contact Parent
-                </motion.button>
-                <span className="text-[10px] text-slate-500">Flagged {alert.dateFlagged}</span>
-              </div>
-            </motion.div>
-          ))}
+        <div className="p-5 rounded-3xl clay-card">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-extrabold text-purple-700">Early Warning System</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 font-extrabold text-xs">
+              3 Flags
+            </span>
+          </div>
+          <p className="text-2xl font-black text-rose-600 mt-2">3 Students Flagged</p>
+          <p className="text-xs text-purple-800 font-bold mt-1">Requires Support & Counseling</p>
         </div>
       </div>
 
       {/* Attendance Marker Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 p-6 rounded-3xl bg-slate-900/80 border border-slate-800 glass-panel space-y-4 shadow-xl">
+        <div className="lg:col-span-2 p-6 rounded-3xl clay-card space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-base text-slate-100 flex items-center gap-2">
-                <CheckSquare className="w-5 h-5 text-emerald-400" />
-                <span>Class 10-A Attendance Marker</span>
+              <h3 className="font-black text-lg text-[#1E1B4B] flex items-center gap-2">
+                <CheckSquare className="w-5 h-5 text-emerald-600" />
+                <span>Grade 5-A Attendance Logger</span>
               </h3>
-              <p className="text-xs text-slate-400">July 29, 2026 • Period 2 Advanced Physics</p>
+              <p className="text-xs text-purple-700 font-medium">May 28, 2025 • Morning Register</p>
             </div>
 
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={handleSaveAttendance}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
             >
-              <CheckCircle2 className="w-4 h-4" /> Save Attendance Log
-            </motion.button>
+              <CheckCircle2 className="w-4 h-4" /> Save Register
+            </button>
           </div>
 
           {savedAttendance && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-xl font-bold text-xs text-center">
-              ✓ Class Attendance Saved & Synced with Parent Portal!
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-2xl font-extrabold text-xs text-center">
+              ✓ Attendance Logged & Synced to Parent Portal!
             </motion.div>
           )}
 
-          <div className="divide-y divide-slate-800 bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden">
+          <div className="divide-y divide-purple-100 bg-purple-50/40 rounded-2xl border border-purple-100 overflow-hidden">
             {studentsList.map((std) => {
               const status = attendance[std.id] || 'present';
               return (
-                <div key={std.id} className="p-3.5 flex items-center justify-between hover:bg-slate-900/50 transition-colors">
+                <div key={std.id} className="p-3.5 flex items-center justify-between hover:bg-white transition-colors">
                   <div className="flex items-center gap-3">
-                    <img src={std.avatar} alt={std.name} className="w-8 h-8 rounded-full object-cover" />
+                    <img src={std.avatar} alt={std.name} className="w-9 h-9 rounded-full object-cover ring-1 ring-purple-200" />
                     <div>
-                      <h5 className="font-bold text-xs text-slate-200">{std.name}</h5>
-                      <p className="text-[10px] text-slate-400">{std.roll}</p>
+                      <h5 className="font-black text-xs text-[#1E1B4B]">{std.name}</h5>
+                      <p className="text-[10px] font-bold text-purple-700">{std.roll}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-1.5">
-                    {['present', 'absent', 'late'].map((st) => (
-                      <motion.button
+                    {['present', 'absent'].map((st) => (
+                      <button
                         key={st}
-                        whileTap={{ scale: 0.9 }}
                         onClick={() => toggleAttendance(std.id, st as any)}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold capitalize transition-all ${
+                        className={`px-3.5 py-1 rounded-xl text-xs font-extrabold capitalize transition-all cursor-pointer ${
                           status === st
-                            ? st === 'present' ? 'bg-emerald-500 text-slate-950' : st === 'absent' ? 'bg-rose-500 text-white' : 'bg-amber-500 text-slate-950'
-                            : 'bg-slate-900 text-slate-400 border border-slate-800 hover:bg-slate-800'
+                            ? st === 'present' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-rose-500 text-white shadow-xs'
+                            : 'bg-white text-purple-800 border border-purple-200 hover:bg-purple-50'
                         }`}
                       >
                         {st}
-                      </motion.button>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -195,27 +181,32 @@ export const TeacherDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column */}
+        {/* AI Early Warning Column */}
         <div className="space-y-4">
-          <div className="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 glass-panel space-y-3 shadow-xl">
-            <h3 className="font-bold text-sm text-slate-100 flex items-center gap-2">
-              <Users className="w-4 h-4 text-brand-400" />
-              <span>Class Metrics</span>
+          <div className="p-6 rounded-3xl clay-card space-y-4">
+            <h3 className="font-black text-base text-[#1E1B4B] flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-rose-500" />
+              <span>Struggling Student Flags</span>
             </h3>
 
             <div className="space-y-3 text-xs">
-              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex justify-between">
-                <span className="text-slate-400">Total Enrolled:</span>
-                <span className="font-bold text-slate-200">28 Students</span>
-              </div>
-              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex justify-between">
-                <span className="text-slate-400">Average Grade:</span>
-                <span className="font-bold text-emerald-400">89.4% (Grade A-)</span>
-              </div>
-              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex justify-between">
-                <span className="text-slate-400">Submission Rate:</span>
-                <span className="font-bold text-brand-400">96.2% on time</span>
-              </div>
+              {MOCK_RISK_ALERTS.slice(0, 2).map((alert) => (
+                <div key={alert.id} className="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h5 className="font-black text-rose-950">{alert.studentName}</h5>
+                    <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-rose-200 text-rose-800">
+                      {alert.riskType.toUpperCase()} RISK
+                    </span>
+                  </div>
+                  <p className="text-slate-700 font-medium leading-relaxed">{alert.reason}</p>
+                  <button
+                    onClick={() => setActiveTab('communication')}
+                    className="w-full py-1.5 rounded-xl bg-white border border-rose-200 text-rose-700 hover:bg-rose-100 font-extrabold text-[11px] flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <Send className="w-3 h-3" /> Contact Parent (Priya Sharma)
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -224,32 +215,32 @@ export const TeacherDashboard: React.FC = () => {
       {/* Modal */}
       <AnimatePresence>
         {showCreateAssignmentModal && (
-          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-[#1E1B4B]/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4"
+              className="bg-white border border-purple-100 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4"
             >
-              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 className="font-bold text-base text-white flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-purple-400" />
-                  <span>Create New Assignment</span>
+              <div className="flex justify-between items-center border-b border-purple-100 pb-3">
+                <h3 className="font-black text-base text-[#1E1B4B] flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-[#7C3AED]" />
+                  <span>Create Homework Task</span>
                 </h3>
-                <button onClick={() => setShowCreateAssignmentModal(false)} className="text-slate-400 hover:text-white">✕</button>
+                <button onClick={() => setShowCreateAssignmentModal(false)} className="text-purple-400 hover:text-purple-700 font-bold cursor-pointer">✕</button>
               </div>
 
               <div className="space-y-3 text-xs">
                 <div>
-                  <label className="block text-slate-400 mb-1">Assignment Title</label>
-                  <input type="text" placeholder="e.g. Thermodynamics Problem Set #5" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white" />
+                  <label className="block text-purple-900 font-bold mb-1">Homework Title</label>
+                  <input type="text" placeholder="e.g. Mathematics Multiplication Practice #4" className="w-full bg-purple-50/50 border border-purple-100 rounded-2xl p-3 text-[#1E1B4B] font-medium focus:outline-none focus:border-[#7C3AED]" />
                 </div>
 
                 <button
                   onClick={() => setShowCreateAssignmentModal(false)}
-                  className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl shadow-lg transition-all"
+                  className="w-full py-3 bg-gradient-to-r from-[#7C3AED] to-[#9333EA] text-white font-extrabold rounded-2xl shadow-md cursor-pointer"
                 >
-                  Publish Assignment to Class 10-A
+                  Publish to Grade 5-A
                 </button>
               </div>
             </motion.div>

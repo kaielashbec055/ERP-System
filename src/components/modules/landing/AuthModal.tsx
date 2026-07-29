@@ -1,48 +1,101 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../../context/AppContext';
 import { UserRole } from '../../../types';
-import { X, Lock, Mail, User, GraduationCap, ShieldCheck, School, Sparkles, ArrowRight } from 'lucide-react';
+import { X, Lock, Mail, User, GraduationCap, ShieldCheck, School, Sparkles, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { loginApi } from '../../../services/api';
 
 export const AuthModal: React.FC = () => {
-  const { isAuthModalOpen, setIsAuthModalOpen, setRole, setIsLandingPage, authMode, setAuthMode } = useApp();
+  const {
+    isAuthModalOpen,
+    setIsAuthModalOpen,
+    setRole,
+    setIsLandingPage,
+    authMode,
+    setAuthMode,
+    authTargetRole,
+    setAuthTargetRole,
+    addNotification
+  } = useApp();
+
   const [selectedRole, setSelectedRole] = useState<UserRole>('student');
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [successToast, setSuccessToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (authTargetRole) {
+      setSelectedRole(authTargetRole);
+    }
+  }, [authTargetRole]);
 
   const isRegister = authMode === 'signup';
 
   if (!isAuthModalOpen) return null;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setRole(selectedRole);
-    setIsLandingPage(false);
-    setIsAuthModalOpen(false);
+    setLoading(true);
+
+    const activeRole = selectedRole;
+    const roleCapitalized = activeRole.charAt(0).toUpperCase() + activeRole.slice(1);
+    const toastMessage = isRegister
+      ? `${roleCapitalized} Account Created Successfully!`
+      : `${roleCapitalized} Login Successful! Redirecting to Dashboard...`;
+
+    setSuccessToast(toastMessage);
+
+    // Notify app notifications stream
+    addNotification({
+      title: `${roleCapitalized} Authentication`,
+      message: `${roleCapitalized} persona authenticated successfully.`,
+      type: 'wellness'
+    });
+
+    try {
+      const targetEmail = email || (activeRole === 'student' ? 'alex.vance@edupulse.edu' : activeRole === 'parent' ? 'sarah.vance@gmail.com' : activeRole === 'teacher' ? 'm.thorne@edupulse.edu' : 'principal@edupulse.edu');
+      const res = await loginApi(targetEmail);
+      if (res && res.user) {
+        setRole(res.user.role || activeRole);
+      } else {
+        setRole(activeRole);
+      }
+    } catch {
+      setRole(activeRole);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+        setSuccessToast(null);
+        setAuthTargetRole(null);
+        setIsLandingPage(false);
+        setIsAuthModalOpen(false);
+      }, 900);
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-xl z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 relative animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 bg-[#1E1B4B]/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div className="bg-white border border-purple-100 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 relative animate-in fade-in zoom-in duration-200">
         <button
           onClick={() => setIsAuthModalOpen(false)}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800"
+          className="absolute top-4 right-4 p-2 text-purple-400 hover:text-purple-700 rounded-2xl hover:bg-purple-50 cursor-pointer font-bold transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Tab switcher: Sign In vs Sign Up */}
-        <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+        <div className="flex bg-purple-50 p-1 rounded-2xl border border-purple-100 text-xs">
           <button
             onClick={() => setAuthMode('signin')}
-            className={`flex-1 py-2 rounded-lg font-bold transition-all ${
-              !isRegister ? 'bg-brand-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+            className={`flex-1 py-2 rounded-xl font-extrabold transition-all cursor-pointer ${
+              !isRegister ? 'purple-pill-active' : 'text-purple-700 hover:text-purple-900'
             }`}
           >
             Sign In
           </button>
           <button
             onClick={() => setAuthMode('signup')}
-            className={`flex-1 py-2 rounded-lg font-bold transition-all ${
-              isRegister ? 'bg-brand-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+            className={`flex-1 py-2 rounded-xl font-extrabold transition-all cursor-pointer ${
+              isRegister ? 'purple-pill-active' : 'text-purple-700 hover:text-purple-900'
             }`}
           >
             Sign Up
@@ -50,33 +103,42 @@ export const AuthModal: React.FC = () => {
         </div>
 
         <div className="text-center space-y-1">
-          <div className="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-tr from-brand-600 via-cyan-500 to-emerald-400 p-0.5 shadow-lg mb-2 flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-white" />
+          <div className="w-14 h-14 mx-auto rounded-3xl bg-gradient-to-tr from-[#7C3AED] via-[#9333EA] to-[#C084FC] p-0.5 shadow-md mb-2 flex items-center justify-center glow-purple">
+            <div className="w-full h-full bg-white rounded-[22px] flex items-center justify-center">
+              <Sparkles className="w-7 h-7 text-[#7C3AED]" />
+            </div>
           </div>
-          <h2 className="text-xl font-extrabold text-white">
-            {isRegister ? 'Create EduPulse Account' : 'Sign In to EduPulse AI'}
+          <h2 className="text-2xl font-black text-[#1E1B4B]">
+            {isRegister ? 'Join EduSync AI' : 'Welcome Back'}
           </h2>
-          <p className="text-xs text-slate-400">
-            {isRegister ? 'Register your institutional profile below' : 'Select your institution persona to enter'}
+          <p className="text-xs text-purple-800/80 font-medium">
+            {isRegister ? 'Create your institutional profile below' : 'Login to continue your learning journey'}
           </p>
         </div>
 
+        {successToast && (
+          <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-2xl text-emerald-800 text-xs font-extrabold flex items-center justify-center gap-2 animate-bounce shadow-sm">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <span>{successToast}</span>
+          </div>
+        )}
+
         {/* Role Selector Tabs */}
-        <div className="grid grid-cols-4 gap-1.5 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
+        <div className="grid grid-cols-4 gap-1.5 bg-purple-50/80 p-1.5 rounded-2xl border border-purple-100">
           {[
-            { role: 'student', label: 'Student', icon: <GraduationCap className="w-3.5 h-3.5" /> },
-            { role: 'parent', label: 'Parent', icon: <User className="w-3.5 h-3.5" /> },
-            { role: 'teacher', label: 'Teacher', icon: <ShieldCheck className="w-3.5 h-3.5" /> },
-            { role: 'admin', label: 'Admin', icon: <School className="w-3.5 h-3.5" /> }
+            { role: 'student', label: 'Student', icon: <GraduationCap className="w-4 h-4" /> },
+            { role: 'parent', label: 'Parent', icon: <User className="w-4 h-4" /> },
+            { role: 'teacher', label: 'Teacher', icon: <ShieldCheck className="w-4 h-4" /> },
+            { role: 'admin', label: 'Admin', icon: <School className="w-4 h-4" /> }
           ].map((r) => (
             <button
               key={r.role}
               type="button"
               onClick={() => setSelectedRole(r.role as UserRole)}
-              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1 ${
+              className={`py-2 px-1 rounded-xl text-xs font-extrabold transition-all flex flex-col items-center gap-1 cursor-pointer ${
                 selectedRole === r.role
-                  ? 'bg-brand-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-gradient-to-r from-[#7C3AED] to-[#9333EA] text-white shadow-sm'
+                  : 'text-purple-700 hover:text-purple-950'
               }`}
             >
               {r.icon}
@@ -88,14 +150,14 @@ export const AuthModal: React.FC = () => {
         <form onSubmit={handleLogin} className="space-y-3.5 text-xs">
           {isRegister && (
             <div>
-              <label className="block text-slate-400 mb-1 font-semibold">Full Name / Institution Name</label>
+              <label className="block text-purple-900 mb-1 font-bold">Full Name / Institution Name</label>
               <div className="relative">
-                <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
                 <input
                   type="text"
                   placeholder="Enter full name"
-                  defaultValue={selectedRole === 'student' ? 'Alex Vance' : selectedRole === 'parent' ? 'Sarah Vance' : selectedRole === 'teacher' ? 'Dr. Marcus Thorne' : 'St. Jude Academy'}
-                  className="w-full pl-10 pr-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-brand-500"
+                  defaultValue={selectedRole === 'student' ? 'Aarav Sharma' : selectedRole === 'parent' ? 'Priya Sharma' : selectedRole === 'teacher' ? 'Mrs. Sharma' : 'St. Jude Academy'}
+                  className="w-full pl-10 pr-3 py-2.5 bg-purple-50/50 border border-purple-100 rounded-2xl text-[#1E1B4B] font-medium focus:outline-none focus:border-[#7C3AED]"
                   required
                 />
               </div>
@@ -103,27 +165,27 @@ export const AuthModal: React.FC = () => {
           )}
 
           <div>
-            <label className="block text-slate-400 mb-1 font-semibold">Institutional Email</label>
+            <label className="block text-purple-900 mb-1 font-bold">Institutional Email</label>
             <div className="relative">
-              <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
               <input
                 type="email"
                 value={email || (selectedRole === 'student' ? 'alex.vance@edupulse.edu' : selectedRole === 'parent' ? 'sarah.vance@gmail.com' : selectedRole === 'teacher' ? 'm.thorne@edupulse.edu' : 'principal@edupulse.edu')}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-brand-500"
+                className="w-full pl-10 pr-3 py-2.5 bg-purple-50/50 border border-purple-100 rounded-2xl text-[#1E1B4B] font-medium focus:outline-none focus:border-[#7C3AED]"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-slate-400 mb-1 font-semibold">Security Password</label>
+            <label className="block text-purple-900 mb-1 font-bold">Security Password</label>
             <div className="relative">
-              <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
               <input
                 type="password"
                 defaultValue="••••••••••••"
-                className="w-full pl-10 pr-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-brand-500"
+                className="w-full pl-10 pr-3 py-2.5 bg-purple-50/50 border border-purple-100 rounded-2xl text-[#1E1B4B] font-medium focus:outline-none focus:border-[#7C3AED]"
                 required
               />
             </div>
@@ -131,18 +193,18 @@ export const AuthModal: React.FC = () => {
 
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-brand-600 via-cyan-500 to-emerald-400 text-white font-extrabold text-xs shadow-lg shadow-brand-500/25 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#7C3AED] to-[#9333EA] hover:from-[#6D28D9] text-white font-extrabold text-xs shadow-md glow-purple transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <span>{isRegister ? `Create ${selectedRole.toUpperCase()} Account` : `Sign In as ${selectedRole.toUpperCase()}`}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="text-center pt-2 border-t border-slate-800 text-[11px] text-slate-400">
+        <div className="text-center pt-2 border-t border-purple-100 text-[11px] text-purple-800 font-medium">
           <span>{isRegister ? 'Already have an account?' : 'Need a new school account?'} </span>
           <button
             onClick={() => setAuthMode(isRegister ? 'signin' : 'signup')}
-            className="text-brand-400 font-bold hover:underline"
+            className="text-[#7C3AED] font-black hover:underline cursor-pointer"
           >
             {isRegister ? 'Sign In' : 'Sign Up Free'}
           </button>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
+import { clearTokens } from '../../services/api';
 import {
   Bell,
   Search,
@@ -33,34 +34,34 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <header className="bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-40 px-4 lg:px-6 py-3 shadow-lg">
+    <header className="bg-white/90 backdrop-blur-xl border-b border-purple-100 sticky top-0 z-40 px-4 lg:px-6 py-3 shadow-xs">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Brand Logo & Tagline */}
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setIsLandingPage(false)}
-            className="flex items-center gap-2.5 text-left group"
+            className="flex items-center gap-2.5 text-left group cursor-pointer"
           >
             <motion.div
               whileHover={{ scale: 1.08, rotate: 3 }}
               whileTap={{ scale: 0.95 }}
-              className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-cyan-500 to-emerald-400 p-0.5 shadow-lg shadow-brand-500/20"
+              className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#7C3AED] via-[#9333EA] to-[#C084FC] p-0.5 shadow-md shadow-purple-500/15"
             >
-              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <HeartPulse className="w-5 h-5 text-brand-400 animate-pulse" />
+              <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-[#7C3AED] animate-pulse" />
               </div>
             </motion.div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
-                  EduPulse<span className="text-brand-400">.AI</span>
+                <span className="font-black text-xl tracking-tight text-[#1E1B4B]">
+                  EduSync<span className="text-[#7C3AED]"> AI</span>
                 </span>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">
-                  v2.4 PRO
+                <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-purple-100 text-[#7C3AED] border border-purple-200">
+                  Level 5 Learner
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 font-medium hidden sm:block">
-                Smart Student Ecosystem
+              <p className="text-[11px] text-purple-700 font-medium hidden sm:block">
+                Every Child. Every Moment. Connected.
               </p>
             </div>
           </button>
@@ -69,11 +70,11 @@ export const Navbar: React.FC = () => {
         {/* Global Search Bar */}
         <div className="hidden md:flex flex-1 max-w-md mx-4">
           <div className="relative w-full">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
             <input
               type="text"
-              placeholder="Search grades, bus location, circulars, assignments..."
-              className="w-full pl-10 pr-4 py-2 bg-slate-950/70 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500/60 focus:ring-1 focus:ring-brand-500/30 transition-all"
+              placeholder="Search subjects, bus location, timetable, assignments..."
+              className="w-full pl-10 pr-4 py-2 bg-purple-50/60 border border-purple-100 rounded-2xl text-sm text-[#1E1B4B] placeholder-purple-400 focus:outline-none focus:bg-white focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/20 transition-all"
             />
           </div>
         </div>
@@ -82,12 +83,12 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center gap-3">
           {/* Emergency SOS Button */}
           <motion.button
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsSosModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold transition-all shadow-lg shadow-rose-500/10 group animate-pulse-slow"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-rose-50 hover:bg-rose-100 text-[#EF4444] border border-rose-200 text-xs font-extrabold transition-all shadow-sm group cursor-pointer"
           >
-            <AlertTriangle className="w-4 h-4 text-rose-400 group-hover:rotate-12 transition-transform" />
+            <AlertTriangle className="w-4 h-4 text-[#EF4444] group-hover:rotate-12 transition-transform" />
             <span className="hidden sm:inline">EMERGENCY SOS</span>
           </motion.button>
 
@@ -100,11 +101,11 @@ export const Navbar: React.FC = () => {
                 setShowNotifications(!showNotifications);
                 setShowProfileMenu(false);
               }}
-              className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 border border-slate-700/80 relative transition-all"
+              className="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 relative transition-all cursor-pointer"
             >
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center shadow-md animate-bounce">
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#EF4444] text-white rounded-full text-[10px] font-extrabold flex items-center justify-center shadow-md animate-bounce">
                   {unreadCount}
                 </span>
               )}
@@ -118,30 +119,30 @@ export const Navbar: React.FC = () => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-80 sm:w-96 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                  className="absolute right-0 mt-2 w-80 sm:w-96 bg-white/95 backdrop-blur-xl border border-slate-200 rounded-3xl shadow-xl z-50 overflow-hidden"
                 >
-                  <div className="p-3.5 bg-slate-850 border-b border-slate-800 flex items-center justify-between">
+                  <div className="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Bell className="w-4 h-4 text-brand-400" />
-                      <h4 className="font-semibold text-sm text-slate-100">Notifications</h4>
+                      <Bell className="w-4 h-4 text-[#4F7CFF]" />
+                      <h4 className="font-bold text-sm text-[#1E293B]">Notifications</h4>
                     </div>
-                    <span className="text-xs text-slate-400">{unreadCount} unread</span>
+                    <span className="text-xs font-semibold text-slate-500 bg-white px-2.5 py-0.5 rounded-full border border-slate-200">{unreadCount} unread</span>
                   </div>
 
-                  <div className="max-h-80 overflow-y-auto divide-y divide-slate-800/60">
+                  <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
                     {notifications.map((n) => (
                       <div
                         key={n.id}
                         onClick={() => markNotificationRead(n.id)}
-                        className={`p-3.5 hover:bg-slate-800/50 cursor-pointer transition-colors ${
-                          !n.read ? 'bg-brand-950/20' : ''
+                        className={`p-3.5 hover:bg-slate-50/80 cursor-pointer transition-colors ${
+                          !n.read ? 'bg-blue-50/40' : ''
                         }`}
                       >
                         <div className="flex items-start gap-3">
-                          <div className={`p-2 rounded-lg text-xs mt-0.5 ${
-                            n.type === 'alert' ? 'bg-rose-500/20 text-rose-400' :
-                            n.type === 'transport' ? 'bg-amber-500/20 text-amber-400' :
-                            n.type === 'academic' ? 'bg-brand-500/20 text-brand-400' : 'bg-emerald-500/20 text-emerald-400'
+                          <div className={`p-2 rounded-xl text-xs mt-0.5 ${
+                            n.type === 'alert' ? 'bg-rose-100 text-rose-600' :
+                            n.type === 'transport' ? 'bg-amber-100 text-amber-600' :
+                            n.type === 'academic' ? 'bg-blue-100 text-[#4F7CFF]' : 'bg-emerald-100 text-emerald-600'
                           }`}>
                             {n.type === 'alert' ? <AlertTriangle className="w-3.5 h-3.5" /> :
                              n.type === 'transport' ? <Bus className="w-3.5 h-3.5" /> :
@@ -149,10 +150,10 @@ export const Navbar: React.FC = () => {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center justify-between">
-                              <h5 className="text-xs font-semibold text-slate-200">{n.title}</h5>
-                              <span className="text-[10px] text-slate-500">{n.timestamp}</span>
+                              <h5 className="text-xs font-bold text-[#1E293B]">{n.title}</h5>
+                              <span className="text-[10px] font-medium text-slate-400">{n.timestamp}</span>
                             </div>
-                            <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{n.message}</p>
+                            <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">{n.message}</p>
                           </div>
                         </div>
                       </div>
@@ -166,24 +167,24 @@ export const Navbar: React.FC = () => {
           {/* User Profile Dropdown */}
           <div className="relative">
             <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => {
                 setShowProfileMenu(!showProfileMenu);
                 setShowNotifications(false);
               }}
-              className="flex items-center gap-2 p-1.5 pl-2 pr-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 transition-all"
+              className="flex items-center gap-2 p-1.5 pl-2 pr-3 rounded-2xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 transition-all cursor-pointer"
             >
               <img
                 src={user.avatar}
                 alt={user.name}
-                className="w-7 h-7 rounded-lg object-cover ring-1 ring-brand-500/50"
+                className="w-7 h-7 rounded-xl object-cover ring-2 ring-[#4F7CFF]/30"
               />
               <div className="text-left hidden lg:block">
-                <p className="text-xs font-semibold text-slate-200 leading-tight">{user.name}</p>
-                <p className="text-[10px] text-brand-400 font-medium capitalize">{user.role}</p>
+                <p className="text-xs font-bold text-[#1E293B] leading-tight">{user.name}</p>
+                <p className="text-[10px] text-[#4F7CFF] font-semibold capitalize">{user.role}</p>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
             </motion.button>
 
             <AnimatePresence>
@@ -193,61 +194,27 @@ export const Navbar: React.FC = () => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2 z-50 space-y-2"
+                  className="absolute right-0 mt-2 w-64 bg-white/95 backdrop-blur-xl border border-slate-200 rounded-3xl shadow-xl p-3 z-50 space-y-2"
                 >
-                  <div className="px-3 py-2 border-b border-slate-800">
-                    <p className="text-xs font-bold text-slate-200">{user.name}</p>
-                    <p className="text-[11px] text-slate-400">{user.email}</p>
-                    <p className="text-[10px] text-brand-400 font-semibold mt-1 bg-brand-500/10 px-2 py-0.5 rounded inline-block">
+                  <div className="px-3 py-2 border-b border-slate-100">
+                    <p className="text-xs font-bold text-[#1E293B]">{user.name}</p>
+                    <p className="text-[11px] text-slate-500">{user.email}</p>
+                    <p className="text-[10px] text-[#4F7CFF] font-bold mt-1.5 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full inline-block">
                       {user.title || user.gradeOrSubject}
                     </p>
                   </div>
 
-                  {/* Persona Switcher inside Profile Menu */}
-                  <div className="px-2 py-1 space-y-1">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Switch View Role</p>
-                    <div className="grid grid-cols-2 gap-1">
-                      {roles.map((r) => (
-                        <button
-                          key={r.key}
-                          onClick={() => {
-                            setRole(r.key);
-                            setIsLandingPage(false);
-                            setShowProfileMenu(false);
-                          }}
-                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all ${
-                            role === r.key
-                              ? 'bg-brand-600 text-white font-bold'
-                              : 'bg-slate-950 text-slate-300 hover:bg-slate-800'
-                          }`}
-                        >
-                          {r.icon}
-                          <span className="truncate">{r.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="pt-1 border-t border-slate-800">
+                  <div className="pt-2 border-t border-slate-100">
                     <button
                       onClick={() => {
+                        clearTokens();
                         setIsLandingPage(true);
                         setShowProfileMenu(false);
                       }}
-                      className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 rounded-lg flex items-center gap-2"
+                      className="w-full text-left px-3 py-2 text-xs font-extrabold text-rose-600 hover:bg-rose-50 rounded-2xl flex items-center gap-2 transition-colors cursor-pointer"
                     >
-                      <User className="w-3.5 h-3.5 text-slate-400" />
-                      <span>View Public Landing Page</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsAuthModalOpen(true);
-                        setShowProfileMenu(false);
-                      }}
-                      className="w-full text-left px-3 py-2 text-xs text-rose-400 hover:bg-rose-500/10 rounded-lg flex items-center gap-2"
-                    >
-                      <LogIn className="w-3.5 h-3.5 text-rose-400" />
-                      <span>Switch / Login Account</span>
+                      <LogIn className="w-4 h-4 text-rose-500" />
+                      <span>Sign Out Account</span>
                     </button>
                   </div>
                 </motion.div>

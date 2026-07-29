@@ -8,24 +8,55 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: '#f0f7ff',
-          100: '#e0effe',
-          200: '#bae0fd',
-          300: '#7cc8fc',
-          400: '#38b0f8',
-          500: '#0e96e6',
-          600: '#0277c7',
-          700: '#035fa3',
-          800: '#075185',
-          900: '#0c446e',
-          950: '#082b49',
+        primary: {
+          DEFAULT: '#4F7CFF',
+          50: '#F4F7FF',
+          100: '#E8EFFF',
+          200: '#D1E0FF',
+          300: '#A3C2FF',
+          400: '#75A3FF',
+          500: '#4F7CFF',
+          600: '#2659ED',
+          700: '#1944C6',
+          800: '#1637A0',
+          900: '#16307F',
         },
-        slate: {
-          850: '#151e2e',
-          900: '#0f172a',
-          950: '#090d16',
-        }
+        brand: {
+          50: '#F4F7FF',
+          100: '#E8EFFF',
+          200: '#D1E0FF',
+          300: '#A3C2FF',
+          400: '#75A3FF',
+          500: '#4F7CFF',
+          600: '#2659ED',
+          700: '#1944C6',
+          800: '#1637A0',
+          900: '#16307F',
+          950: '#0F2056',
+        },
+        secondary: {
+          DEFAULT: '#8B5CF6',
+          50: '#F5F3FF',
+          100: '#EDE9FE',
+          500: '#8B5CF6',
+          600: '#7C3AED',
+        },
+        accent: {
+          DEFAULT: '#38BDF8',
+          50: '#F0F9FF',
+          500: '#38BDF8',
+        },
+        softbg: '#F8FAFC',
+        emerald: {
+          500: '#22C55E',
+          600: '#16A34A',
+        },
+        coral: {
+          DEFAULT: '#EF4444',
+          500: '#EF4444',
+          600: '#DC2626',
+        },
+        darkslate: '#1E293B',
       },
       fontFamily: {
         sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],

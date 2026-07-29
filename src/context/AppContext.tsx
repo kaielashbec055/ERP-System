@@ -1,6 +1,16 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserRole, UserProfile, ChildInfo, NotificationItem, DigitalGatePass, MoodEntry, EmergencyAlert } from '../types';
 import { MOCK_USERS, MOCK_CHILDREN, MOCK_NOTIFICATIONS, MOCK_GATE_PASSES, MOCK_MOOD_ENTRIES, MOCK_EMERGENCY_ALERTS } from '../mockData/mockData';
+import {
+  createGatePassApi,
+  createMoodEntryApi,
+  createEmergencyAlertApi,
+  markNotificationReadApi,
+  getNotificationsApi,
+  getGatePassesApi,
+  getMoodEntriesApi,
+  getEmergencyAlertsApi
+} from '../services/api';
 
 interface AppContextType {
   role: UserRole;
@@ -13,6 +23,7 @@ interface AppContextType {
   childrenList: ChildInfo[];
   notifications: NotificationItem[];
   markNotificationRead: (id: string) => void;
+  addNotification: (notif: { title: string; message: string; type?: 'alert' | 'academic' | 'transport' | 'wellness' }) => void;
   gatePasses: DigitalGatePass[];
   addGatePass: (pass: Omit<DigitalGatePass, 'id' | 'status' | 'qrCodeUrl'>) => void;
   moodEntries: MoodEntry[];
@@ -25,7 +36,9 @@ interface AppContextType {
   setIsAuthModalOpen: (open: boolean) => void;
   authMode: 'signin' | 'signup';
   setAuthMode: (mode: 'signin' | 'signup') => void;
-  openAuthModal: (mode?: 'signin' | 'signup') => void;
+  authTargetRole: UserRole | null;
+  setAuthTargetRole: (role: UserRole | null) => void;
+  openAuthModal: (mode?: 'signin' | 'signup', targetRole?: UserRole) => void;
   isLandingPage: boolean;
   setIsLandingPage: (isLanding: boolean) => void;
 }
@@ -44,10 +57,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isSosModalOpen, setIsSosModalOpen] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [authTargetRole, setAuthTargetRole] = useState<UserRole | null>(null);
   const [isLandingPage, setIsLandingPage] = useState<boolean>(true);
 
-  const openAuthModal = (mode: 'signin' | 'signup' = 'signin') => {
+  // Fetch initial API data on mount
+  useEffect(() => {
+    async function loadInitialData() {
+      try {
+        const notifs = await getNotificationsApi();
+        if (notifs && notifs.length > 0) setNotifications(notifs);
+
+        const passes = await getGatePassesApi();
+        if (passes && passes.length > 0) setGatePasses(passes);
+
+        const moods = await getMoodEntriesApi();
+        if (moods && moods.length > 0) setMoodEntries(moods);
+
+        const emergencies = await getEmergencyAlertsApi();
+        if (emergencies && emergencies.length > 0) setEmergencyAlerts(emergencies);
+      } catch (err) {
+        console.log('[AppContext] API load fallback active');
+      }
+    }
+    loadInitialData();
+  }, []);
+
+  const openAuthModal = (mode: 'signin' | 'signup' = 'signin', targetRole?: UserRole) => {
     setAuthMode(mode);
+    if (targetRole) {
+      setAuthTargetRole(targetRole);
+    }
     setIsAuthModalOpen(true);
   };
 
@@ -58,46 +97,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const user = MOCK_USERS[role];
 
-  const markNotificationRead = (id: string) => {
+  const markNotificationRead = async (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    await markNotificationReadApi(id);
   };
 
-  const addGatePass = (pass: Omit<DigitalGatePass, 'id' | 'status' | 'qrCodeUrl'>) => {
-    const newPass: DigitalGatePass = {
-      ...pass,
-      id: `gp_${Date.now()}`,
-      status: 'approved',
-      qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=GP-EDUPULSE-2026-${Math.floor(100000 + Math.random() * 900000)}`
-    };
-    setGatePasses(prev => [newPass, ...prev]);
-  };
-
-  const addMoodEntry = (entry: Omit<MoodEntry, 'id'>) => {
-    const newEntry: MoodEntry = {
-      ...entry,
-      id: `m_${Date.now()}`
-    };
-    setMoodEntries(prev => [newEntry, ...prev.filter(e => e.date !== entry.date)]);
-  };
-
-  const triggerEmergencyAlert = (alertData: Omit<EmergencyAlert, 'id' | 'timestamp' | 'status'>) => {
-    const newAlert: EmergencyAlert = {
-      ...alertData,
-      id: `emg_${Date.now()}`,
-      timestamp: new Date().toLocaleString(),
-      status: 'active'
-    };
-    setEmergencyAlerts(prev => [newAlert, ...prev]);
-    // Add to notifications
-    const newNotif: NotificationItem = {
-      id: `notif_${Date.now()}`,
-      title: `EMERGENCY ALERT: ${alertData.title}`,
-      message: alertData.message,
+  const addNotification = (notif: { title: string; message: string; type?: 'alert' | 'academic' | 'transport' | 'wellness' }) => {
+    const newItem: NotificationItem = {
+      id: `notif_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      title: notif.title,
+      message: notif.message,
       timestamp: 'Just now',
       read: false,
-      type: 'alert'
+      type: notif.type || 'academic'
     };
-    setNotifications(prev => [newNotif, ...prev]);
+    setNotifications(prev => [newItem, ...prev]);
+  };
+
+  const addGatePass = async (pass: Omit<DigitalGatePass, 'id' | 'status' | 'qrCodeUrl'>) => {
+    const created = await createGatePassApi(pass);
+    setGatePasses(prev => [created, ...prev]);
+  };
+
+  const addMoodEntry = async (entry: Omit<MoodEntry, 'id'>) => {
+    const created = await createMoodEntryApi(entry);
+    setMoodEntries(prev => [created, ...prev.filter(e => e.date !== entry.date)]);
+  };
+
+  const triggerEmergencyAlert = async (alertData: Omit<EmergencyAlert, 'id' | 'timestamp' | 'status'>) => {
+    const created = await createEmergencyAlertApi(alertData);
+    setEmergencyAlerts(prev => [created, ...prev]);
+
+    // Add to notifications stream
+    addNotification({
+      title: `EMERGENCY ALERT: ${alertData.title}`,
+      message: alertData.message,
+      type: 'alert'
+    });
   };
 
   return (
@@ -112,6 +148,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       childrenList,
       notifications,
       markNotificationRead,
+      addNotification,
       gatePasses,
       addGatePass,
       moodEntries,
@@ -124,6 +161,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsAuthModalOpen,
       authMode,
       setAuthMode,
+      authTargetRole,
+      setAuthTargetRole,
       openAuthModal,
       isLandingPage,
       setIsLandingPage

@@ -149,7 +149,7 @@ export interface ChatMessage {
   senderId: string;
   senderName: string;
   senderAvatar: string;
-  role: 'user' | 'assistant' | 'teacher' | 'parent';
+  role: UserRole | 'user' | 'assistant';
   text: string;
   timestamp: string;
   suggestedActions?: string[];

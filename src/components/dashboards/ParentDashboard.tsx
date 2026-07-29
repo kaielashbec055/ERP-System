@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../../context/AppContext';
+import { getParentChildrenApi } from '../../services/api';
+import { ChildInfo } from '../../types';
 import {
   Bus,
   CreditCard,
@@ -10,13 +12,35 @@ import {
   MapPin,
   Phone,
   Shield,
-  DollarSign
+  DollarSign,
+  Smile,
+  Calendar,
+  AlertCircle,
+  Activity,
+  ArrowRight,
+  MessageSquare
 } from 'lucide-react';
 
 export const ParentDashboard: React.FC = () => {
   const { user, selectedChild, setSelectedChild, childrenList, setActiveTab } = useApp();
   const [showFeeModal, setShowFeeModal] = useState(false);
   const [feePaidSuccess, setFeePaidSuccess] = useState(false);
+  const [children, setChildren] = useState<ChildInfo[]>(childrenList);
+
+  useEffect(() => {
+    async function loadChildren() {
+      try {
+        const list = await getParentChildrenApi();
+        if (list && list.length > 0) {
+          setChildren(list);
+          setSelectedChild(list[0]);
+        }
+      } catch (e) {
+        console.log('[ParentDashboard] Local fallback active');
+      }
+    }
+    loadChildren();
+  }, []);
 
   const handlePayFee = () => {
     setFeePaidSuccess(true);
@@ -26,6 +50,14 @@ export const ParentDashboard: React.FC = () => {
     }, 1500);
   };
 
+  const childTimeline = [
+    { time: '08:15 AM', title: 'Reached School', desc: 'Gate Pass QR scanned at Main Entrance', icon: '🏫', color: 'bg-emerald-100 text-emerald-800' },
+    { time: '10:30 AM', title: 'Math Homework Submitted', desc: 'Problem Set #4 scored 100%', icon: '📐', color: 'bg-purple-100 text-[#7C3AED]' },
+    { time: '01:15 PM', title: 'Science Quiz Completed', desc: 'Score: 92% (Exceeds expectations)', icon: '🧪', color: 'bg-blue-100 text-blue-800' },
+    { time: '03:30 PM', title: 'Bus Boarded', desc: 'School Bus KA 09 AB 1234 departed campus', icon: '🚌', color: 'bg-amber-100 text-amber-800' },
+    { time: '04:05 PM', title: 'Reached Home', desc: 'Parent notification confirmed at Vance Stop', icon: '🏠', color: 'bg-indigo-100 text-indigo-800' }
+  ];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
@@ -33,254 +65,162 @@ export const ParentDashboard: React.FC = () => {
       transition={{ duration: 0.3 }}
       className="space-y-6"
     >
-      {/* Parent Header & Multi-Child Selector */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-emerald-950/40 to-slate-900 border border-emerald-500/20 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 w-fit mb-2">
-            <Shield className="w-3.5 h-3.5 text-emerald-400" /> Parent Portal Overview
+      {/* Parent Header & Child Switcher */}
+      <div className="p-6 md:p-8 rounded-3xl purple-gradient-hero text-white shadow-xl glow-purple flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="space-y-2">
+          <span className="px-3.5 py-1 rounded-full bg-white/20 text-white backdrop-blur-md text-xs font-black flex items-center gap-1.5 w-fit border border-white/20">
+            <Shield className="w-3.5 h-3.5 text-amber-300" /> Parent Portal • Priya Sharma
           </span>
-          <h1 className="text-2xl font-extrabold text-white">Welcome, {user.name}</h1>
-          <p className="text-slate-300 text-xs mt-1">
-            Monitoring safety, academics, transport, and school communication for your children.
+          <h1 className="text-2xl sm:text-3xl font-black">Good Morning, Priya Sharma 👋</h1>
+          <p className="text-purple-100 text-xs sm:text-sm font-medium max-w-xl">
+            Real-time telemetry for <strong className="text-white font-extrabold">{selectedChild.name} ({selectedChild.grade})</strong>.
           </p>
         </div>
 
         {/* Multi-Child Selector Tabs */}
-        <div className="flex items-center gap-2 bg-slate-950/80 p-2 rounded-2xl border border-slate-800">
-          <span className="text-xs text-slate-400 font-semibold px-2">Select Child:</span>
+        <div className="flex items-center gap-2 bg-white/95 p-2 rounded-2xl border border-white/40 backdrop-blur-md shadow-md">
+          <span className="text-xs text-purple-900 font-extrabold px-2">Child:</span>
           {childrenList.map((child) => (
             <motion.button
               key={child.id}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setSelectedChild(child)}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                 selectedChild.id === child.id
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-md'
-                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  ? 'bg-gradient-to-r from-[#7C3AED] to-[#9333EA] text-white shadow-sm'
+                  : 'bg-purple-50 text-purple-900 hover:bg-purple-100'
               }`}
             >
-              <img src={child.avatar} alt={child.name} className="w-5 h-5 rounded-full object-cover" />
-              <span>{child.name} ({child.grade})</span>
+              <img src={child.avatar} alt={child.name} className="w-5 h-5 rounded-full object-cover ring-1 ring-white" />
+              <span>{child.name}</span>
             </motion.button>
           ))}
         </div>
       </div>
 
-      {/* Selected Child Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <motion.div whileHover={{ y: -4, scale: 1.02 }} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 glass-card">
+      {/* Selected Child Today's Overview Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-5 rounded-3xl clay-card">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Child GPA</span>
-            <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
-              <TrendingUp className="w-5 h-5" />
+            <span className="text-xs font-extrabold text-purple-700">Attendance</span>
+            <div className="p-2 rounded-2xl bg-emerald-100 text-emerald-700 font-bold text-xs">
+              95%
             </div>
           </div>
-          <p className="text-2xl font-black text-white mt-2">{selectedChild.gpa} <span className="text-xs font-normal text-slate-400">/ 4.0</span></p>
-          <p className="text-[11px] text-emerald-400 font-semibold mt-1">Academic Honors</p>
-        </motion.div>
+          <p className="text-2xl font-black text-[#1E1B4B] mt-2">Present Today</p>
+          <p className="text-[11px] text-emerald-700 font-bold mt-1">✓ On-Time Arrival 08:15 AM</p>
+        </div>
 
-        <motion.div whileHover={{ y: -4, scale: 1.02 }} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 glass-card">
+        <div className="p-5 rounded-3xl clay-card">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Attendance</span>
-            <div className="p-2 rounded-xl bg-brand-500/20 text-brand-400">
-              <Clock className="w-5 h-5" />
+            <span className="text-xs font-extrabold text-purple-700">Homework</span>
+            <div className="p-2 rounded-2xl bg-amber-100 text-amber-700 font-bold text-xs">
+              3 Tasks
             </div>
           </div>
-          <p className="text-2xl font-black text-white mt-2">{selectedChild.attendancePercent}%</p>
-          <p className="text-[11px] text-slate-400 mt-1">Regular Attendance</p>
-        </motion.div>
+          <p className="text-2xl font-black text-[#1E1B4B] mt-2">3 Pending</p>
+          <p className="text-[11px] text-amber-700 font-bold mt-1">Due 28 May</p>
+        </div>
 
-        <motion.div whileHover={{ y: -4, scale: 1.02 }} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 glass-card">
+        <div className="p-5 rounded-3xl clay-card">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Bus Status</span>
-            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
-              <Bus className="w-5 h-5 animate-bounce" />
+            <span className="text-xs font-extrabold text-purple-700">Child's Mood</span>
+            <div className="p-2 rounded-2xl bg-purple-100 text-[#7C3AED] font-bold text-xs">
+              😊 Happy
             </div>
           </div>
-          <p className="text-lg font-black text-emerald-400 mt-2">On Route (ETA 8m)</p>
-          <p className="text-[11px] text-slate-400 mt-1">{selectedChild.busRoute}</p>
-        </motion.div>
+          <p className="text-2xl font-black text-[#1E1B4B] mt-2">Feeling Happy</p>
+          <p className="text-[11px] text-purple-700 font-bold mt-1">Reported 08:15 AM</p>
+        </div>
 
-        <motion.div whileHover={{ y: -4, scale: 1.02 }} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 glass-card">
+        <div className="p-5 rounded-3xl clay-card">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Fee Status</span>
-            <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400">
-              <CreditCard className="w-5 h-5" />
+            <span className="text-xs font-extrabold text-purple-700">Term Fee</span>
+            <div className="p-2 rounded-2xl bg-indigo-100 text-indigo-700 font-bold text-xs">
+              $450
             </div>
           </div>
-          <p className="text-xl font-black text-white mt-2">
-            {selectedChild.pendingFeeAmount > 0 ? (
-              <span className="text-amber-400">${selectedChild.pendingFeeAmount} Due</span>
-            ) : (
-              <span className="text-emerald-400">All Paid</span>
-            )}
-          </p>
-          <p className="text-[11px] text-slate-400 mt-1">Term II Tuition</p>
-        </motion.div>
+          <p className="text-2xl font-black text-[#1E1B4B] mt-2">$450 Due</p>
+          <p className="text-[11px] text-indigo-700 font-bold mt-1">Term II Tuition</p>
+        </div>
       </div>
 
-      {/* Main Grid: Live Bus GPS & Fee Management */}
+      {/* Main Split: Timeline & Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Live Bus Safety Tracking Card */}
-        <div className="lg:col-span-2 p-6 rounded-3xl bg-slate-900/80 border border-slate-800 glass-panel space-y-4 shadow-xl">
+        {/* Child Daily Timeline */}
+        <div className="lg:col-span-2 p-6 rounded-3xl clay-card space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-base text-slate-100 flex items-center gap-2">
-                <Bus className="w-5 h-5 text-amber-400 animate-pulse" />
-                <span>Live School Bus GPS Tracking</span>
+              <h3 className="font-black text-lg text-[#1E1B4B] flex items-center gap-2">
+                <Clock className="w-5 h-5 text-[#7C3AED]" />
+                <span>Aarav's Daily Timeline</span>
               </h3>
-              <p className="text-xs text-slate-400">Real-time location for BUS-14 (North Sector Route)</p>
+              <p className="text-xs text-purple-700 font-medium">20 May, 2025 • Real-time telemetry feed</p>
             </div>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveTab('safety')}
-              className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-bold transition-all flex items-center gap-1 shadow-md"
-            >
-              <span>Full Interactive Map</span>
-            </motion.button>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 shadow-inner">
-            <div className="flex items-center justify-between text-xs border-b border-slate-800/80 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></div>
-                <span className="font-bold text-slate-200">BUS-14 • Active GPS Signal</span>
-              </div>
-              <span className="text-amber-400 font-extrabold bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/20">
-                Speed: 38 km/h (Safe Zone)
-              </span>
-            </div>
-
-            {/* Route Timeline */}
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between text-xs text-slate-400">
-                <span>Oakridge Estate</span>
-                <span className="font-bold text-emerald-400">Current: Maple Street Circle</span>
-                <span>EduPulse Main Gate</span>
-              </div>
-
-              <div className="relative w-full h-3 bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-emerald-500 via-amber-400 to-slate-700 rounded-full w-[65%]"></div>
-                <div className="absolute top-0 left-[62%] -translate-y-1 p-1 bg-amber-400 text-slate-950 rounded-full shadow-lg animate-bounce">
-                  <Bus className="w-3 h-3" />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1.5 text-slate-300">
-                  <MapPin className="w-3.5 h-3.5 text-rose-400" />
-                  <span>Next Stop: <strong>Maple Street Circle (Vance Stop)</strong></span>
-                </div>
-                <span className="text-emerald-400 font-extrabold">ETA: 8 minutes</span>
-              </div>
-            </div>
-
-            {/* Driver Contact */}
-            <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-300 font-bold">
-                  RJ
-                </div>
-                <div>
-                  <p className="font-bold text-slate-200">Robert Jenkins (Driver)</p>
-                  <p className="text-[10px] text-slate-400">Licensed Campus Driver • 100% Safety Score</p>
-                </div>
-              </div>
-              <a
-                href="tel:+15553829910"
-                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 border border-slate-700"
+          <div className="space-y-3 pt-2">
+            {childTimeline.map((item, idx) => (
+              <motion.div
+                key={idx}
+                whileHover={{ scale: 1.01 }}
+                className="p-4 rounded-2xl bg-purple-50/40 border border-purple-100 flex items-center justify-between gap-4 transition-all"
               >
-                <Phone className="w-3.5 h-3.5 text-emerald-400" /> Call Driver
-              </a>
-            </div>
+                <div className="flex items-center gap-3.5">
+                  <div className={`w-10 h-10 rounded-2xl border flex items-center justify-center text-base font-bold ${item.color}`}>
+                    {item.icon}
+                  </div>
+                  <div>
+                    <h4 className="font-black text-xs text-[#1E1B4B]">{item.title}</h4>
+                    <p className="text-[11px] text-purple-800 font-medium">{item.desc}</p>
+                  </div>
+                </div>
+
+                <span className="text-xs font-black text-purple-900 bg-white px-3 py-1 rounded-full border border-purple-200">
+                  {item.time}
+                </span>
+              </motion.div>
+            ))}
           </div>
         </div>
 
-        {/* Right Column: Fee Portal */}
-        <div className="space-y-4">
-          <div className="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 glass-panel space-y-4 shadow-xl">
-            <h3 className="font-bold text-sm text-slate-100 flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-purple-400" />
-              <span>School Fee Portal</span>
+        {/* Learning Progress Insights */}
+        <div className="space-y-6">
+          <div className="p-6 rounded-3xl clay-card space-y-4">
+            <h3 className="font-black text-base text-[#1E1B4B] flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-[#7C3AED]" />
+              <span>Learning Insights</span>
             </h3>
 
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-400">Student Name:</span>
-                <span className="font-bold text-slate-200">{selectedChild.name}</span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-400">Term II Tuition & Transport:</span>
-                <span className="font-bold text-slate-200">$450.00</span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-400">Due Date:</span>
-                <span className="text-amber-400 font-bold">August 10, 2026</span>
+            <div className="p-4 rounded-2xl bg-purple-50 border border-purple-100 space-y-2">
+              <span className="text-[10px] font-black uppercase text-purple-700 tracking-wider block">Overall Progress</span>
+              <h4 className="font-black text-base text-[#1E1B4B]">Great Progress! 📈</h4>
+              <p className="text-xs text-purple-900 font-medium">Aarav has improved <strong className="text-[#7C3AED]">18%</strong> in Mathematics this month.</p>
+            </div>
+
+            <div className="space-y-2 pt-1 text-xs">
+              <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
+                <span className="font-black text-emerald-900 block">Strengths:</span>
+                <span className="text-emerald-800 font-bold">Math, Reading & Physics</span>
               </div>
 
-              {selectedChild.pendingFeeAmount > 0 ? (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowFeeModal(true)}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-600/20 transition-all flex items-center justify-center gap-1.5"
-                >
-                  <DollarSign className="w-4 h-4" /> Pay Term Fee Now ($450)
-                </motion.button>
-              ) : (
-                <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-center font-bold text-xs flex items-center justify-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4" /> Fees Fully Paid
-                </div>
-              )}
+              <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200">
+                <span className="font-black text-amber-900 block">Needs Attention:</span>
+                <span className="text-amber-800 font-bold">Science Lab Projects</span>
+              </div>
             </div>
+
+            <button
+              onClick={() => setActiveTab('chat')}
+              className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#7C3AED] to-[#9333EA] text-white font-extrabold text-xs shadow-md glow-purple transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span>Chat with Class Educator (Mrs. Sharma)</span>
+            </button>
           </div>
         </div>
       </div>
-
-      {/* Pay Fee Dialog Modal */}
-      <AnimatePresence>
-        {showFeeModal && (
-          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4"
-            >
-              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 className="font-bold text-base text-white flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-purple-400" />
-                  <span>EduPulse Pay Gateway</span>
-                </h3>
-                <button onClick={() => setShowFeeModal(false)} className="text-slate-400 hover:text-white">✕</button>
-              </div>
-
-              <div className="space-y-3 text-xs">
-                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
-                  <p className="text-slate-400">Payer: Sarah Vance</p>
-                  <p className="text-slate-400">Student: {selectedChild.name} ({selectedChild.grade})</p>
-                  <p className="text-slate-200 font-bold text-sm mt-1">Total: $450.00 USD</p>
-                </div>
-
-                {feePaidSuccess ? (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-xl text-center font-bold">
-                    ✓ Payment Successful! Receipt sent to sarah.vance@gmail.com
-                  </motion.div>
-                ) : (
-                  <motion.button
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handlePayFee}
-                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition-all"
-                  >
-                    Confirm & Pay $450.00
-                  </motion.button>
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 };
