@@ -173,18 +173,18 @@ export const Navbar: React.FC = () => {
                 setShowProfileMenu(!showProfileMenu);
                 setShowNotifications(false);
               }}
-              className="flex items-center gap-2 p-1.5 pl-2 pr-3 rounded-2xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 transition-all cursor-pointer"
+              className="flex items-center gap-2 p-1.5 pl-2 pr-3 rounded-2xl bg-purple-50 hover:bg-purple-100/80 border border-purple-100 transition-all cursor-pointer"
             >
               <img
                 src={user.avatar}
                 alt={user.name}
-                className="w-7 h-7 rounded-xl object-cover ring-2 ring-[#4F7CFF]/30"
+                className="w-7 h-7 rounded-xl object-cover ring-2 ring-[#7C3AED]/30"
               />
               <div className="text-left hidden lg:block">
-                <p className="text-xs font-bold text-[#1E293B] leading-tight">{user.name}</p>
-                <p className="text-[10px] text-[#4F7CFF] font-semibold capitalize">{user.role}</p>
+                <p className="text-xs font-black text-[#1E1B4B] leading-tight">{user.name}</p>
+                <p className="text-[10px] text-[#7C3AED] font-bold capitalize">{user.role} Portal</p>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+              <ChevronDown className="w-3.5 h-3.5 text-purple-400" />
             </motion.button>
 
             <AnimatePresence>
@@ -194,17 +194,59 @@ export const Navbar: React.FC = () => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-64 bg-white/95 backdrop-blur-xl border border-slate-200 rounded-3xl shadow-xl p-3 z-50 space-y-2"
+                  className="absolute right-0 mt-2 w-72 bg-white/95 backdrop-blur-xl border border-purple-100 rounded-3xl shadow-2xl p-3.5 z-50 space-y-3"
                 >
-                  <div className="px-3 py-2 border-b border-slate-100">
-                    <p className="text-xs font-bold text-[#1E293B]">{user.name}</p>
-                    <p className="text-[11px] text-slate-500">{user.email}</p>
-                    <p className="text-[10px] text-[#4F7CFF] font-bold mt-1.5 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full inline-block">
+                  <div className="px-3 py-2 bg-purple-50/70 border border-purple-100 rounded-2xl">
+                    <p className="text-xs font-black text-[#1E1B4B]">{user.name}</p>
+                    <p className="text-[11px] text-purple-700 font-medium">{user.email}</p>
+                    <span className="text-[10px] text-[#7C3AED] font-extrabold mt-1.5 bg-white border border-purple-200 px-2.5 py-0.5 rounded-full inline-block">
                       {user.title || user.gradeOrSubject}
-                    </p>
+                    </span>
                   </div>
 
-                  <div className="pt-2 border-t border-slate-100">
+                  {/* Switch User Portal Section */}
+                  <div className="space-y-1.5 pt-1 border-t border-purple-100">
+                    <p className="text-[10px] font-black uppercase text-purple-900 px-1 tracking-wider">
+                      Switch User Portal
+                    </p>
+
+                    <div className="space-y-1">
+                      {[
+                        { key: 'student', name: 'Aarav Sharma', roleLabel: 'Student View', icon: <GraduationCap className="w-3.5 h-3.5 text-[#7C3AED]" /> },
+                        { key: 'parent', name: 'Priya Sharma', roleLabel: 'Parent View', icon: <User className="w-3.5 h-3.5 text-emerald-600" /> },
+                        { key: 'teacher', name: 'Mrs. Sharma', roleLabel: 'Teacher View', icon: <Shield className="w-3.5 h-3.5 text-indigo-600" /> },
+                        { key: 'admin', name: 'Dr. Eleanor Vance', roleLabel: 'Admin View', icon: <School className="w-3.5 h-3.5 text-amber-600" /> }
+                      ].map((r) => {
+                        const isCurrent = role === r.key;
+                        return (
+                          <button
+                            key={r.key}
+                            onClick={() => {
+                              setIsLandingPage(false);
+                              setRole(r.key as UserRole);
+                              setShowProfileMenu(false);
+                            }}
+                            className={`w-full text-left p-2 rounded-xl flex items-center justify-between transition-all cursor-pointer ${
+                              isCurrent
+                                ? 'bg-purple-100 border border-purple-200 font-extrabold text-[#7C3AED]'
+                                : 'hover:bg-purple-50 text-purple-900 border border-transparent'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              {r.icon}
+                              <div>
+                                <p className="text-xs font-bold leading-tight">{r.name}</p>
+                                <p className="text-[9px] text-purple-700 font-medium">{r.roleLabel}</p>
+                              </div>
+                            </div>
+                            {isCurrent && <span className="text-[10px] font-black bg-[#7C3AED] text-white px-2 py-0.5 rounded-full">ACTIVE</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-purple-100">
                     <button
                       onClick={() => {
                         clearTokens();

@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
-  const { role, activeTab, setActiveTab, setIsSosModalOpen } = useApp();
+  const { role, setRole, activeTab, setActiveTab, setIsSosModalOpen, setIsLandingPage } = useApp();
 
   const getNavItems = () => {
     switch (role) {
@@ -66,20 +66,51 @@ export const Sidebar: React.FC = () => {
   return (
     <aside className="w-64 bg-white/70 backdrop-blur-xl border-r border-slate-200/80 hidden lg:flex flex-col justify-between p-4 sticky top-[65px] h-[calc(100vh-65px)] shadow-sm">
       <div className="space-y-6">
-        {/* Role Identity Card */}
+        {/* Role Identity Card & Persona Switcher */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
-          className="p-4 rounded-3xl bg-slate-50/80 border border-slate-200/80 shadow-sm"
+          className="p-4 rounded-3xl bg-purple-50/80 border border-purple-100 shadow-sm space-y-3"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-2xl bg-blue-100 border border-blue-200 flex items-center justify-center text-[#4F7CFF] font-extrabold text-xs">
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-[#7C3AED] to-[#9333EA] text-white flex items-center justify-center font-black text-xs shadow-sm">
               {role === 'student' ? 'ST' : role === 'parent' ? 'PR' : role === 'teacher' ? 'TC' : 'AD'}
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Current View</p>
-              <h4 className="text-xs font-extrabold text-[#1E293B] capitalize">{role} Ecosystem</h4>
+              <p className="text-[10px] font-black uppercase tracking-wider text-purple-900">Current Portal</p>
+              <h4 className="text-xs font-black text-[#1E1B4B] capitalize">{role} Ecosystem</h4>
+            </div>
+          </div>
+
+          {/* Quick Switcher Pills */}
+          <div className="pt-2 border-t border-purple-100/80">
+            <p className="text-[9px] font-black uppercase text-purple-900 mb-1.5">Switch Persona Portal:</p>
+            <div className="grid grid-cols-2 gap-1">
+              {[
+                { key: 'student', label: 'Student' },
+                { key: 'parent', label: 'Parent' },
+                { key: 'teacher', label: 'Teacher' },
+                { key: 'admin', label: 'Admin' }
+              ].map((r) => {
+                const isActive = role === r.key;
+                return (
+                  <button
+                    key={r.key}
+                    onClick={() => {
+                      setIsLandingPage(false);
+                      setRole(r.key as any);
+                    }}
+                    className={`py-1 px-2 rounded-xl text-[10px] font-extrabold transition-all cursor-pointer text-center ${
+                      isActive
+                        ? 'bg-[#7C3AED] text-white shadow-xs'
+                        : 'bg-white text-purple-900 hover:bg-purple-100 border border-purple-200'
+                    }`}
+                  >
+                    {r.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </motion.div>

@@ -318,22 +318,86 @@ export async function sendAiChatApi(prompt: string, userRole: UserRole): Promise
       body: JSON.stringify({ prompt, role: userRole })
     });
   } catch {
-    // Smart client-side fallback
-    if (prompt.toLowerCase().includes('physics')) {
+    const query = prompt.toLowerCase().trim();
+
+    // 1. Photosynthesis & Biology
+    if (query.includes('photosynthesis') || query.includes('plant') || query.includes('leaf') || query.includes('chlorophyll')) {
       return {
-        text: "Dr. Thorne's Physics class covers Motion & Thermodynamics. Next test is scheduled for next Tuesday!",
-        suggestedActions: ['View Physics Notes', 'Practice Physics Quiz']
+        text: `🌱 **Photosynthesis Explained Step-by-Step**:\n\nPhotosynthesis is the fundamental biological process where green plants convert solar energy into chemical food energy.\n\n1. **Inputs Needed**: Sunlight + Carbon Dioxide (CO₂) + Water (H₂O)\n2. **Chemical Formula**: 6CO₂ + 6H₂O + Sunlight ➔ C₆H₁₂O₆ (Glucose) + 6O₂ (Oxygen)\n3. **Where It Happens**: Inside the **Chloroplasts** using green chlorophyll pigment.\n4. **Why It Matters**: It supplies oxygen for human and animal respiration and forms the base of Earth's food chain!`,
+        suggestedActions: ['Take Science Quiz', 'Cell Structure Notes', 'Contact Educator']
       };
     }
-    if (prompt.toLowerCase().includes('bus') || prompt.toLowerCase().includes('eta')) {
+
+    // 2. Physics, Gravity & Motion
+    if (query.includes('physics') || query.includes('newton') || query.includes('gravity') || query.includes('motion') || query.includes('force')) {
       return {
-        text: 'BUS-14 is currently on Maple Street Circle. Speed: 38 km/h. ETA to Vance Stop is 8 minutes.',
-        suggestedActions: ['View Bus Tracker Map', 'Call Driver Hotline']
+        text: `⚡ **Physics & Laws of Motion Detailed Explanation**:\n\n• **Gravity**: The universal attractive force between objects with mass. Acceleration due to gravity on Earth is **g = 9.8 m/s²**.\n• **Newton's First Law**: Objects stay in motion or rest unless acted on by net external force.\n• **Newton's Second Law**: **Force = Mass × Acceleration (F = m · a)**\n• **Newton's Third Law**: For every action, there is an equal and opposite reaction.\n\n📚 **Practice Tip**: Next Physics test is coming up in Period 2 (Room 305)!`,
+        suggestedActions: ['Solve Motion Equations', 'View Class Timetable', 'Ask Dr. Thorne']
       };
     }
+
+    // 3. Math & Equation Solving
+    if (query.includes('math') || query.includes('solve') || query.includes('equation') || query.includes('+') || query.includes('-') || query.includes('*') || query.includes('/') || query.includes('fraction') || query.includes('algebra')) {
+      // Try parsing numeric patterns if any equation was entered
+      const eqMatch = prompt.match(/(\d+)\s*([\+\-\*\/])\s*(\d+)/);
+      let solutionStr = '';
+      if (eqMatch) {
+        const n1 = parseFloat(eqMatch[1]);
+        const op = eqMatch[2];
+        const n2 = parseFloat(eqMatch[3]);
+        let res = 0;
+        if (op === '+') res = n1 + n2;
+        if (op === '-') res = n1 - n2;
+        if (op === '*') res = n1 * n2;
+        if (op === '/') res = n2 !== 0 ? n1 / n2 : 0;
+        solutionStr = `\n\n🔢 **Instant Calculation**: ${n1} ${op} ${n2} = **${res}**`;
+      }
+
+      return {
+        text: `📐 **Step-by-Step Math Solution & Explanation**:${solutionStr}\n\n1. **Identify Given Info**: Separate known constants from unknown variables.\n2. **Order of Operations (PEMDAS/BODMAS)**: Parentheses ➔ Exponents ➔ Multiplication/Division ➔ Addition/Subtraction.\n3. **Isolate Variable**: Apply inverse operations on both sides to solve for 'x'.\n\n🎯 **Active Quest**: Complete 3 Math Quizzes in the Learning Module for **+100 XP**!`,
+        suggestedActions: ['Play Math Quest', 'Submit Assignment', 'Ask AI Buddy']
+      };
+    }
+
+    // 4. Bus Tracking & Telemetry
+    if (query.includes('bus') || query.includes('eta') || query.includes('location') || query.includes('route') || query.includes('driver')) {
+      return {
+        text: `🚌 **Live Bus Telemetry Status (School Bus KA 09 AB 1234)**:\n\n• **Status**: BUS ON THE WAY\n• **Current Location**: Maple Street Circle (Vance Stop)\n• **Distance**: 2.5 km from school\n• **ETA**: 10 minutes\n• **Speed**: 28 km/h (Safe Corridor)\n• **Driver**: Robert Jenkins (Call: +1-555-382-9910)`,
+        suggestedActions: ['Open Live Bus Map', 'Call Driver Hotline', 'Check Gate Pass']
+      };
+    }
+
+    // 5. Attendance & Student Records
+    if (query.includes('attendance') || query.includes('present') || query.includes('absent') || query.includes('leave')) {
+      return {
+        text: `✅ **Attendance Telemetry Report (Class 5-A / Grade 10)**:\n\n• **Student**: Aarav Sharma (Class 5-A)\n• **Today's Status**: PRESENT (Gate Pass QR scanned at 08:15 AM)\n• **Cumulative Attendance**: 95% Present (60 of 62 School Days)\n• **Class Breakdown**: 32 Students Enrolled (28 Present, 4 Absent today).`,
+        suggestedActions: ['Request Digital Gate Pass', 'View Attendance Log', 'Contact Parent']
+      };
+    }
+
+    // 6. Schedule & Timetable
+    if (query.includes('schedule') || query.includes('timetable') || query.includes('class') || query.includes('today')) {
+      return {
+        text: `📅 **Today's Class Schedule (28 May)**:\n\n1. 📐 **Math**: 09:00 AM - 10:00 AM (Room 201)\n2. 🧪 **Science**: 10:15 AM - 11:15 AM (Room 305)\n3. 📚 **English**: 11:30 AM - 12:30 PM (Room 102)\n4. 🎨 **Art & Craft**: 01:30 PM - 02:30 PM (Room 204)\n5. 🏛️ **History**: 03:00 PM - 04:00 PM (Room 101)`,
+        suggestedActions: ['View Homework Tasks', 'Ask AI Study Buddy', 'Check Assignments']
+      };
+    }
+
+    // 7. Fee & Payments
+    if (query.includes('fee') || query.includes('pay') || query.includes('tuition') || query.includes('cost')) {
+      return {
+        text: `💳 **School Fee Portal Summary**:\n\n• **Term II Tuition & Transport**: $450.00 USD\n• **Due Date**: August 10, 2026\n• **Status**: Pending Payment\n• **Payer**: Priya Sharma (Parent)`,
+        suggestedActions: ['Pay Term Fee ($450)', 'Download Receipt', 'Contact Accounts']
+      };
+    }
+
+    // 8. General Dynamic Query Explanation Handler for ALL other topics
+    const cleanTopic = prompt.replace(/explain|what is|how to|can you|tell me about|help me with/gi, '').trim();
+    const topicCapitalized = cleanTopic.charAt(0).toUpperCase() + cleanTopic.slice(1);
+
     return {
-      text: `As the ${userRole} AI guide, I'm here to help you manage academics, transport safety, and campus circulars. How can I assist you further?`,
-      suggestedActions: ['Check Attendance', 'View Circulars', 'Contact Teacher']
+      text: `💡 **EduSync AI Explanation for "${topicCapitalized || prompt}"**:\n\nHere is a clear breakdown of **${topicCapitalized || prompt}**:\n\n1. **Core Concept**: ${topicCapitalized || prompt} is a key subject topic. It involves understanding underlying principles, step-by-step logic, and real-world application.\n2. **Key Takeaway**: Breaking down complex topics into smaller components makes them easier to master.\n3. **Study Strategy**: Review class notes, practice sample questions, or ask your educator (Mrs. Sharma / Dr. Thorne) for tailored guidance.\n\nNeed further clarification on this topic? Feel free to ask a follow-up question!`,
+      suggestedActions: [`More on ${topicCapitalized || 'this topic'}`, 'Contact Educator', 'Take Practice Quiz']
     };
   }
 }
